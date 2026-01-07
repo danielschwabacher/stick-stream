@@ -6,6 +6,7 @@ import struct
 import click
 import uinput
 from evdev import ecodes
+from pprint import pprint
 
 PACK_FMT = "!BHHi"
 
@@ -45,7 +46,7 @@ def get_device(cid):
 
         devices[cid] = uinput.Device(
             capabilities,
-            name=f"Raspberry Pi Streaming Gamepad {cid}",
+            name=f"stick-stream gamepad {cid}",
         )
 
         axis_state[cid] = {}
@@ -53,12 +54,21 @@ def get_device(cid):
     return devices[cid]
 
 
+def log(event_type, controller_name, controller_id, code, value):
+    print(
+        f"Received {event_type} event from controller: {controller_name} controller_id={controller_id} code={code} value={value}"
+    )
+
+
 @click.command()
 @click.option("--port", default=9999, show_default=True, help="UDP port to listen on")
-def receive(port):
+@click.option("--debug", is_flag=True, flag_value=True, help="Enable debug logging")
+def receive(port, debug):
     """Receive controller input and expose virtual gamepads."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("", port))
+    if debug:
+        click.echo("[*] Debug logging enabled")
 
     click.echo(f"[*] Listening for controllers on UDP {port}")
 
@@ -68,10 +78,12 @@ def receive(port):
         dev = get_device(cid)
 
         if etype == ecodes.EV_KEY:
-            # print(f"Recieved a key event from controller: {devices[cid]}. Info: cid={cid} code={code} value={value}")
+            if debug:
+                log("KEY", {devices[cid]._Device__name}, cid, code, value)
             dev.emit((ecodes.EV_KEY, code), value)
         elif etype == ecodes.EV_ABS:
-            # print(f"Recieved something else event: cid={cid} code={code} value={value}")
+            if debug:
+                log("ABS", {devices[cid]._Device__name}, cid, code, value)
             axis_state[cid][code] = value
 
             for axis, val in axis_state[cid].items():
