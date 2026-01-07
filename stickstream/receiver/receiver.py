@@ -7,9 +7,7 @@ import click
 import uinput
 from evdev import ecodes
 
-PORT = 9999
 PACK_FMT = "!BHHi"
-
 
 devices = {}
 axis_state = {}

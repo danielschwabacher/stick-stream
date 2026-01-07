@@ -11,6 +11,7 @@ PACK_FMT = "!BHHi"
 
 
 def find_gamepads():
+    click.echo("[*] Searching for gamepads...")
     devices = []
     for path in list_devices():
         dev = InputDevice(path)
@@ -36,18 +37,24 @@ async def stream_device(dev, controller_id, sock):
 
 
 @click.command()
-@click.option("--host", default="127.0.0.1", help="Receiver IP address")
+@click.option("--host", help="Receiver IP address")
 @click.option("--port", default=9999, show_default=True, help="Receiver UDP port")
 def broadcast(host, port):
     """Broadcast local controller input over the network."""
+    if not host:
+        raise click.BadParameter(
+            "You must specify the IP address of the receiver.",
+            param_hint=["--host"],
+        )
+
     gamepads = find_gamepads()
     if not gamepads:
-        raise click.ClickException("No compatible controllers found")
+        raise click.ClickException("No compatible controllers found on this computer.")
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     addr = (host, port)
 
-    click.echo(f"[*] Broadcasting {len(gamepads)} controllers...")
+    click.echo(f"[*] Broadcasting {len(gamepads)} controllers to IP address {host}...")
 
     for i, dev in enumerate(gamepads):
         click.echo(f"  [{i}] {dev.path} ({dev.name})")
@@ -67,7 +74,11 @@ def broadcast(host, port):
                             event.code,
                             event.value,
                         )
-                        sock.sendto(pkt, addr)
+                        try:
+                            sock.sendto(pkt, addr)
+                        except BlockingIOError:
+                            # Ignore transient send failures for UDP
+                            pass
     finally:
         for dev in gamepads:
             dev.ungrab()

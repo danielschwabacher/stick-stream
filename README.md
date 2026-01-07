@@ -31,7 +31,7 @@ From the perspective of games and applications, the streamed controller is indis
 
 ## Usage
 
-To use `stick-stream`, you'll need to install the `stick-stream` package on both the computer sending gamepad events, and the computer receiving the gamepad events. The `stick-stream` package is an all-in-one, it includes both the server and client software, so the same pacakge can be used on both computers.
+To use `stick-stream`, you'll need to install the `stick-stream` package on both the computer sending gamepad events, and the computer receiving the gamepad events. The `stick-stream` package is an all-in-one, it includes both the server and client software, so the same package can be used on both computers.
 
 After the package is installed on both computers, you will start the broadcast server on the computer with the gamepads plugged into it. On the other computer (the one receiving events), you start the receiver service.
 
@@ -72,13 +72,13 @@ No, not in it's current state. `stick-stream` relies heavily on some Linux-speci
 ### Sender
 
 - Any Linux distro (tested on Debian)
-- Python 3.9+
+- Python 3.12.7
 - `python-evdev`
 
 ### Receiver
 
 - Any Linux distro (tested on Fedora 43)
-- Python 3.9+
+- Python 3.12.7
 - `python-evdev`
 - `python-uinput`
 
