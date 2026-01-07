@@ -3,6 +3,7 @@
 
 import socket
 import struct
+import click
 import uinput
 from evdev import ecodes
 
@@ -54,11 +55,14 @@ def get_device(cid):
     return devices[cid]
 
 
-def main():
+@click.command()
+@click.option("--port", default=9999, show_default=True, help="UDP port to listen on")
+def receive(port):
+    """Receive controller input and expose virtual gamepads."""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.bind(("", PORT))
+    sock.bind(("", port))
 
-    print(f"[*] Listening on UDP {PORT}")
+    click.echo(f"[*] Listening for controllers on UDP {port}")
 
     while True:
         data, _ = sock.recvfrom(64)
@@ -66,18 +70,12 @@ def main():
         dev = get_device(cid)
 
         if etype == ecodes.EV_KEY:
-            print(
-                f"Recieved a key event from controller: {devices[cid]}. Info: cid={cid} code={code} value={value}"
-            )
+            # print(f"Recieved a key event from controller: {devices[cid]}. Info: cid={cid} code={code} value={value}")
             dev.emit((ecodes.EV_KEY, code), value)
         elif etype == ecodes.EV_ABS:
-            print(f"Recieved something else event: cid={cid} code={code} value={value}")
+            # print(f"Recieved something else event: cid={cid} code={code} value={value}")
             axis_state[cid][code] = value
 
             for axis, val in axis_state[cid].items():
                 dev.emit((ecodes.EV_ABS, axis), val, syn=False)
             dev.syn()
-
-
-if __name__ == "__main__":
-    main()

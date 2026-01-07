@@ -29,7 +29,45 @@
 
 From the perspective of games and applications, the streamed controller is indistinguishable from a locally connected USB gamepad.
 
-## Requirements
+## Usage
+
+To use `stick-stream`, you'll need to install the `stick-stream` package on both the computer sending gamepad events, and the computer receiving the gamepad events. The `stick-stream` package is an all-in-one, it includes both the server and client software, so the same pacakge can be used on both computers.
+
+After the package is installed on both computers, you will start the broadcast server on the computer with the gamepads plugged into it. On the other computer (the one receiving events), you start the receiver service.
+
+Full instructions:
+
+#### First, do this on both computers:
+
+- `pip install stick-stream`
+
+#### Broadcast computer (the one with the gamepads plugged into it):
+
+- `stick-stream broadcast --to={IP of the receiving computer} --port={an empty port the service can used for communication}`
+
+#### Receiving computer (the one you want the events to go to)
+
+- `stick-stream receive --port={the same port used by the first command}`
+
+If the software is working properly, you can now do gamepad inputs from the broadcast computer and see them reflected in the receiver computer!
+
+# FAQs
+
+### Does this replace VirtualHere?
+
+Short answer: **no**.
+
+[VirtualHere]([https://www.virtualhere.com/]) supports anything that can be plugged into a USB port (like flash drives and Bluetooth dongles). `stick-stream` is really only designed to forward gamepad inputs.
+
+My guess is that VirtualHere captures everything sent into the USB port and somehow replays them remotely to the connected VirtualHere clients. This is much different than `stick-stream` which only forwards controller input at the Linux input (evdev) level.
+
+However, if you were only using VirtualHere to forward your gamepad inputs over the network, then `stick-stream` will accomplish these same goals.
+
+### Does this work on non-Linux OSes?
+
+No, not in it's current state. `stick-stream` relies heavily on some Linux-specific Kernel features and I have no plans to port it to other operating systems.
+
+## Technical info (ignore this section)
 
 ### Sender
 
@@ -66,19 +104,3 @@ pip install evdev uinput
 ```
 
 > ⚠️ Note: `python-uinput` has multiple incompatible APIs across distros. `stick-stream` targets the tuple-based API commonly found on Debian/Ubuntu systems.
-
-# FAQs
-
-### Does this replace VirtualHere?
-
-Short answer: **no**.
-
-[VirtualHere]([https://www.virtualhere.com/]) supports anything that can be plugged into a USB port (like flash drives and Bluetooth dongles). `stick-stream` is really only designed to forward gamepad inputs.
-
-My guess is that VirtualHere captures everything sent into the USB port and somehow replays them remotely to the connected VirtualHere clients. This is much different than `stick-stream` which only forwards controller input at the Linux input (evdev) level.
-
-However, if you were only using VirtualHere to forward your gamepad inputs over the network, then `stick-stream` will accomplish these same goals.
-
-### Does this work on non-Linux OSes?
-
-No, not in it's current state. `stick-stream` relies heavily on some Linux-specific Kernel features and I have no plans to port it to other operating systems.

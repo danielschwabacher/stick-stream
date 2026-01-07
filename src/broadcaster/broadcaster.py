@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 # RUN THIS FROM THE SERVER WHICH HAS CONTROLLERS PLUGGED INTO IT
-
-import asyncio
 import socket
 import struct
+import click
 from evdev import InputDevice, list_devices, ecodes
-
-SERVER_IP = "10.1.10.12"  # CHANGE ME
-SERVER_PORT = 9999
 
 # Packet format:
 # controller_id (B), type (H), code (H), value (i)
@@ -39,6 +35,45 @@ async def stream_device(dev, controller_id, sock):
             sock.send(packet)
 
 
+@click.command()
+@click.option("--host", default="127.0.0.1", help="Receiver IP address")
+@click.option("--port", default=9999, show_default=True, help="Receiver UDP port")
+def broadcast(host, port):
+    """Broadcast local controller input over the network."""
+    gamepads = find_gamepads()
+    if not gamepads:
+        raise click.ClickException("No compatible controllers found")
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    addr = (host, port)
+
+    click.echo(f"[*] Broadcasting {len(gamepads)} controllers...")
+
+    for i, dev in enumerate(gamepads):
+        click.echo(f"  [{i}] {dev.path} ({dev.name})")
+
+    for dev in gamepads:
+        dev.grab()
+
+    try:
+        while True:
+            for cid, dev in enumerate(gamepads):
+                for event in dev.read():
+                    if event.type in (ecodes.EV_KEY, ecodes.EV_ABS):
+                        pkt = struct.pack(
+                            PACK_FMT,
+                            cid,
+                            event.type,
+                            event.code,
+                            event.value,
+                        )
+                        sock.sendto(pkt, addr)
+    finally:
+        for dev in gamepads:
+            dev.ungrab()
+
+
+"""
 async def main():
     gamepads = find_gamepads()
     if not gamepads:
@@ -58,3 +93,4 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+"""
