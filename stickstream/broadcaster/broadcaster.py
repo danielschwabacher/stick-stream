@@ -65,20 +65,24 @@ def broadcast(host, port):
     try:
         while True:
             for cid, dev in enumerate(gamepads):
-                for event in dev.read():
-                    if event.type in (ecodes.EV_KEY, ecodes.EV_ABS):
-                        pkt = struct.pack(
-                            PACK_FMT,
-                            cid,
-                            event.type,
-                            event.code,
-                            event.value,
-                        )
-                        try:
-                            sock.sendto(pkt, addr)
-                        except BlockingIOError:
-                            # Ignore transient send failures for UDP
-                            pass
+                try:
+                    for event in dev.read():
+                        if event.type in (ecodes.EV_KEY, ecodes.EV_ABS):
+                            pkt = struct.pack(
+                                PACK_FMT,
+                                cid,
+                                event.type,
+                                event.code,
+                                event.value,
+                            )
+                            try:
+                                sock.sendto(pkt, addr)
+                            except BlockingIOError:
+                                # Ignore transient send failures for UDP
+                                pass
+                except BlockingIOError:
+                    # Ignore transient send failures for UDP
+                    pass
     finally:
         for dev in gamepads:
             dev.ungrab()
