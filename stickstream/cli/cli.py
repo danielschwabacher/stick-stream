@@ -1,6 +1,6 @@
 import click
-from ..broadcaster import broadcast
-from ..receiver import receive
+from stickstream.broadcaster.broadcaster import broadcast
+from stickstream.receiver.receiver import receive
 
 
 @click.group()

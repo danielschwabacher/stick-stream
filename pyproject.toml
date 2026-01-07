@@ -1,0 +1,16 @@
+[project]
+name = "stick-stream"
+version = "1.0.0"
+description = "Gamepad streaming for Linux"
+readme = "README.md"
+requires-python = ">=3.8"
+
+[project.scripts]
+stick-stream = "stickstream.cli.cli:cli"
+
+[build-system]
+requires = ["setuptools>=40.9.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["."]
