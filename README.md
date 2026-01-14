@@ -31,7 +31,7 @@ From the perspective of games and applications, the streamed controller is indis
 
 ## Usage
 
-I'm still developing and testing this package, so there is no `pip` distribution of this software (yet). If you want to use it, the following is a hacky way to get it to work. The instructions are split into what you need to do on both the broadcast and receiving computers.
+These instructions are split into what you need to do on both the broadcast and receiving computers.
 
 - **Broadcast computer**: has gamepads plugged into it
 - **Receiving computer**: receives the gamepad events
@@ -40,26 +40,23 @@ I'm still developing and testing this package, so there is no `pip` distribution
 
 #### On both the broadcast and receiving computers
 
-1. Clone this repo:
-   `git clone git@github.com:danielschwabacher/stick-stream.git`
+1. Install the `stick-stream` package. It is available via [`pip`](https://pypi.org/project/stick-stream/). 
 
-2. Setup a Python venv in the repo you just cloned:
-   `python -m venv .`
-
-3. Start the venv: `source bin/activate`
-
-4. Install the dependencies:
-   `pip install -r ./requirements.txt`
-
-5. Install the stick-stream binary: `pip install -e .`
+- `pip install stick-stream`
 
 #### On the broadcast computer
 
 - `stick-stream broadcast --to={IP of the receiving computer} --port={an empty port the service can used for communication}`
 
+> To get the IP address for the receiving computer, you can run: `ip addr` on modern Linux distros.
+
+
+> You don't need to specify a port. The default is 9999 if not specified.
+
 #### On the receiving computer
 
 - `stick-stream receive --port={the same port used by the first command}`
+
 
 If the software is working properly, you can now do gamepad inputs from the broadcast computer and see them reflected in the receiver computer!
 
