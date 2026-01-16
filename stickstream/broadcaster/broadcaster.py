@@ -3,6 +3,7 @@
 import socket
 import struct
 import click
+import sys
 from evdev import InputDevice, list_devices, ecodes
 
 # Packet format:
@@ -49,7 +50,8 @@ def broadcast(host, port):
 
     gamepads = find_gamepads()
     if not gamepads:
-        raise click.ClickException("No compatible controllers found on this computer.")
+        print("No compatible controllers found on this computer.")
+        sys.exit(1)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     addr = (host, port)
@@ -87,25 +89,3 @@ def broadcast(host, port):
         for dev in gamepads:
             dev.ungrab()
 
-
-"""
-async def main():
-    gamepads = find_gamepads()
-    if not gamepads:
-        print("No gamepads found")
-        return
-
-    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    sock.connect((SERVER_IP, SERVER_PORT))
-
-    tasks = []
-    print(f"Total gamepads: {len(gamepads)}")
-    for i, dev in enumerate(gamepads):
-        tasks.append(asyncio.create_task(stream_device(dev, i, sock)))
-
-    await asyncio.gather(*tasks)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-"""
